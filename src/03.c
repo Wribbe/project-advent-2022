@@ -129,7 +129,7 @@ second(char * input)
 int
 main(void)
 {
-  char * input_first = read("inputs/03_test.txt");
+  char * input_first = read("inputs/03.txt");
   printf("Result #1: %zu\n", first(input_first));
 
   char * input_second = read("inputs/03_test.txt");

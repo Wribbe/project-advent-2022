@@ -129,6 +129,22 @@ struct groupsack {
 };
 
 
+char
+find_first_matching_3(struct slice * a, struct slice * b, struct slice * c)
+{
+  for (size_t ii=0; ii<a->size; ii++) {
+    for (size_t jj=0; jj<b->size; jj++) {
+      for (size_t kk=0; kk<c->size; kk++) {
+        if (a->start[ii] == b->start[jj] && b->start[jj] == c->start[kk]) {
+          return a->start[ii];
+        }
+      }
+    }
+  }
+  return '!';
+}
+
+
 void
 groupsack_next(char ** input, struct groupsack * groupsack)
 {
@@ -151,21 +167,13 @@ groupsack_next(char ** input, struct groupsack * groupsack)
     }
   }
 
-//  size_t size_rucksack = end-start;
-//  size_t size_compartment = size_rucksack / 2;
-//
-//  rucksack->compartment_1.size = size_compartment;
-//  rucksack->compartment_1.start = start;
-//
-//  rucksack->compartment_2.size = size_compartment;
-//  rucksack->compartment_2.start = start+size_compartment;
-//
-//  rucksack->common = find_first_matching(
-//    &rucksack->compartment_1,
-//    &rucksack->compartment_2
-//  );
-//
-//  rucksack->priority = item_priority(rucksack->common);
+  groupsack->common = find_first_matching_3(
+    &groupsack->compartments[0],
+    &groupsack->compartments[1],
+    &groupsack->compartments[2]
+  );
+
+  groupsack->priority = item_priority(groupsack->common);
 
   *input = end;
 }
@@ -181,8 +189,8 @@ groupsack_print(struct groupsack * groupsack)
     slice_print(&groupsack->compartments[ii]);
   }
 
-  //printf("Common: %c\n", groupsack->common);
-  //printf("Priority: %d\n", groupsack->priority);
+  printf("Common: %c\n", groupsack->common);
+  printf("Priority: %d\n", groupsack->priority);
 
   printf("%s", "\n");
 }
@@ -192,18 +200,21 @@ int
 second(char * input)
 {
   struct groupsack groupsack = {0};
+  size_t sum_priorities = 0;
 
   for (;;) {
 
     groupsack_next(&input, &groupsack);
     groupsack_print(&groupsack);
 
+    sum_priorities += groupsack.priority;
+
     if (*input == '\0') {
       break;
     }
   }
 
-  return 0;
+  return sum_priorities;
 }
 
 

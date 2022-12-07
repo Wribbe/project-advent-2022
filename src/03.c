@@ -8,7 +8,23 @@ struct rucksack {
   struct slice compartment_1;
   struct slice compartment_2;
   char common;
+  int priority;
 };
+
+
+int
+item_priority(char item)
+{
+  size_t count = 0;
+  for (;;count++,item--) {
+    if (item == 'a') {
+      return 1+count;
+    }
+    if (item == 'A') {
+      return 27+count;
+    }
+  }
+}
 
 
 char
@@ -53,6 +69,8 @@ rucksack_next(char ** input, struct rucksack * rucksack)
     &rucksack->compartment_2
   );
 
+  rucksack->priority = item_priority(rucksack->common);
+
   *input = start+size_rucksack;
 }
 
@@ -71,21 +89,25 @@ rucksack_print(struct rucksack * rucksack)
   printf("%s", "\n");
 
   printf("Common: %c\n", rucksack->common);
+  printf("Priority: %d\n", rucksack->priority);
 
   printf("%s", "\n");
 }
 
 
-int
+size_t
 first(char * input)
 {
 
   struct rucksack rucksack = {0};
+  size_t sum_priorities = 0;
 
   for (;;) {
 
     rucksack_next(&input, &rucksack);
     rucksack_print(&rucksack);
+
+    sum_priorities += rucksack.priority;
 
     if (*input == '\0') {
       break;
@@ -93,7 +115,7 @@ first(char * input)
 
   }
 
-  return 0;
+  return sum_priorities;
 }
 
 
@@ -108,7 +130,7 @@ int
 main(void)
 {
   char * input_first = read("inputs/03_test.txt");
-  printf("Result #1: %d\n", first(input_first));
+  printf("Result #1: %zu\n", first(input_first));
 
   char * input_second = read("inputs/03_test.txt");
   printf("Result #2: %d\n", second(input_second));

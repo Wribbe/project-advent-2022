@@ -4,6 +4,9 @@
 #include "lib/lib.h"
 
 
+#define NUM_PACKS_IN_GROUPSACK 3
+
+
 struct rucksack {
   struct slice compartment_1;
   struct slice compartment_2;
@@ -119,9 +122,87 @@ first(char * input)
 }
 
 
+struct groupsack {
+  struct slice compartments[3];
+  char common;
+  int priority;
+};
+
+
+void
+groupsack_next(char ** input, struct groupsack * groupsack)
+{
+
+  char * start = *input;
+  char * end = start;
+
+  size_t counter_packs = 0;
+
+  for (;;end++) {
+    if (*end == '\n') {
+      end++;
+      groupsack->compartments[counter_packs].start = start;
+      groupsack->compartments[counter_packs].size = end-start;
+      start = end;
+      counter_packs++;
+    }
+    if (counter_packs == NUM_PACKS_IN_GROUPSACK) {
+      break;
+    }
+  }
+
+//  size_t size_rucksack = end-start;
+//  size_t size_compartment = size_rucksack / 2;
+//
+//  rucksack->compartment_1.size = size_compartment;
+//  rucksack->compartment_1.start = start;
+//
+//  rucksack->compartment_2.size = size_compartment;
+//  rucksack->compartment_2.start = start+size_compartment;
+//
+//  rucksack->common = find_first_matching(
+//    &rucksack->compartment_1,
+//    &rucksack->compartment_2
+//  );
+//
+//  rucksack->priority = item_priority(rucksack->common);
+
+  *input = end;
+}
+
+
+void
+groupsack_print(struct groupsack * groupsack)
+{
+  printf("%s\n", "Contents:");
+
+  for (int ii=0; ii<NUM_PACKS_IN_GROUPSACK; ii++) {
+    printf("%s", "  ");
+    slice_print(&groupsack->compartments[ii]);
+  }
+
+  //printf("Common: %c\n", groupsack->common);
+  //printf("Priority: %d\n", groupsack->priority);
+
+  printf("%s", "\n");
+}
+
+
 int
 second(char * input)
 {
+  struct groupsack groupsack = {0};
+
+  for (;;) {
+
+    groupsack_next(&input, &groupsack);
+    groupsack_print(&groupsack);
+
+    if (*input == '\0') {
+      break;
+    }
+  }
+
   return 0;
 }
 

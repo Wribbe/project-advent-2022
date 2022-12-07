@@ -224,7 +224,7 @@ main(void)
   char * input_first = read("inputs/03.txt");
   printf("Result #1: %zu\n", first(input_first));
 
-  char * input_second = read("inputs/03_test.txt");
+  char * input_second = read("inputs/03.txt");
   printf("Result #2: %d\n", second(input_second));
 
   free(input_first);

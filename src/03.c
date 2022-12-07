@@ -5,8 +5,8 @@
 
 
 struct rucksack {
-  size_t size_compartment;
-  const char * contents_start;
+  struct slice compartment_1;
+  struct slice compartment_2;
   char common;
 };
 
@@ -30,8 +30,11 @@ rucksack_next(char ** input, struct rucksack * rucksack)
 
   char * middle = start + size_compartment;
 
-  rucksack->size_compartment = size_compartment;
-  rucksack->contents_start = start;
+  rucksack->compartment_1.size = size_compartment;
+  rucksack->compartment_1.start = start;
+
+  rucksack->compartment_2.size = size_compartment;
+  rucksack->compartment_2.start = start+size_compartment;
 
   *input = start+size_rucksack;
 }
@@ -40,13 +43,16 @@ rucksack_next(char ** input, struct rucksack * rucksack)
 void
 rucksack_print(struct rucksack * rucksack)
 {
-  size_t size_comp = rucksack->size_compartment;
-  const char * start = rucksack->contents_start;
-
-  printf("Size compartment: %zu\n", size_comp);
   printf("%s\n", "Contents:");
-  printf("  %.*s\n", (int)size_comp, start);
-  printf("  %.*s\n", (int)size_comp, start+size_comp);
+
+  printf("%s", "  ");
+  slice_print(&rucksack->compartment_1);
+  printf("%s", "\n");
+
+  printf("%s", "  ");
+  slice_print(&rucksack->compartment_2);
+  printf("%s", "\n");
+
   printf("%s", "\n");
 }
 

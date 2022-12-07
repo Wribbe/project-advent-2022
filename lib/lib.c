@@ -1,6 +1,6 @@
 #include "lib/lib.h"
 
-const char *
+char *
 read(const char * path)
 {
   FILE * handle_file = fopen(path, "r");

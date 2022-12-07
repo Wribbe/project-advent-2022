@@ -11,6 +11,20 @@ struct rucksack {
 };
 
 
+char
+find_first_matching(struct slice * a, struct slice * b)
+{
+  for (size_t ii=0; ii<a->size; ii++) {
+    for (size_t jj=0; jj<b->size; jj++) {
+      if (a->start[ii] == b->start[jj]) {
+        return a->start[ii];
+      }
+    }
+  }
+  return '!';
+}
+
+
 void
 rucksack_next(char ** input, struct rucksack * rucksack)
 {
@@ -28,13 +42,16 @@ rucksack_next(char ** input, struct rucksack * rucksack)
   size_t size_rucksack = end-start;
   size_t size_compartment = size_rucksack / 2;
 
-  char * middle = start + size_compartment;
-
   rucksack->compartment_1.size = size_compartment;
   rucksack->compartment_1.start = start;
 
   rucksack->compartment_2.size = size_compartment;
   rucksack->compartment_2.start = start+size_compartment;
+
+  rucksack->common = find_first_matching(
+    &rucksack->compartment_1,
+    &rucksack->compartment_2
+  );
 
   *input = start+size_rucksack;
 }
@@ -52,6 +69,8 @@ rucksack_print(struct rucksack * rucksack)
   printf("%s", "  ");
   slice_print(&rucksack->compartment_2);
   printf("%s", "\n");
+
+  printf("Common: %c\n", rucksack->common);
 
   printf("%s", "\n");
 }

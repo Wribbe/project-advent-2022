@@ -8,6 +8,11 @@ int
 next_range(char ** input, size_t range[4])
 {
   char * char_p = *input;
+
+  if (*char_p == '\0') {
+    return 0;
+  }
+
   // Format: N1-N2,N3-N4\n
   for (int ii=0; ii<4; ii++) {
     range[ii] = strtoul(char_p, &char_p, 10);
@@ -15,10 +20,6 @@ next_range(char ** input, size_t range[4])
   }
 
   *input = char_p;
-
-  if (*char_p == '\0') {
-    return 0;
-  }
 
   return 1;
 }

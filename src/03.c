@@ -7,12 +7,25 @@
 #define NUM_PACKS_IN_GROUPSACK 3
 
 
+struct slice {
+  size_t size;
+  const char * start;
+};
+
+
 struct rucksack {
   struct slice compartment_1;
   struct slice compartment_2;
   char common;
   int priority;
 };
+
+
+void
+slice_print(struct slice * slice)
+{
+  printf("%.*s", (int)slice->size, slice->start);
+}
 
 
 int

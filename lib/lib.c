@@ -28,10 +28,3 @@ read(const char * path)
 
   return buffer;
 }
-
-
-void
-slice_print(struct slice * slice)
-{
-  printf("%.*s", (int)slice->size, slice->start);
-}

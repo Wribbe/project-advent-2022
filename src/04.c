@@ -137,7 +137,7 @@ main(void)
   printf("Answer #1: %zu\n", first(input_1));
   free(input_1);
 
-  char * input_2 = read("inputs/04_test.txt");
+  char * input_2 = read("inputs/04.txt");
   printf("Answer #2: %zu\n", second(input_2));
   free(input_2);
 }

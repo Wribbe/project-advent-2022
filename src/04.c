@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "lib/lib.h"
 
@@ -23,6 +24,21 @@ next_range(char ** input, size_t range[4])
 }
 
 
+bool
+a_contains_b(size_t a1, size_t a2, size_t b1, size_t b2)
+{
+  return a1 <= b1 && a2 >= b2;
+}
+
+
+bool
+full_overlap(size_t range[4])
+{
+  size_t a1 = range[0], a2 = range[1], b1 = range[2], b2 = range[3];
+  return a_contains_b(a1, a2, b1, b2) || a_contains_b(b1, b2, a1, a2);
+}
+
+
 void
 print_range(size_t range[4])
 {
@@ -30,6 +46,7 @@ print_range(size_t range[4])
   for (int ii=1; ii<4; ii++) {
     printf(", %zu", range[ii]);
   }
+  printf(", Fully overlaps: %d", full_overlap(range));
   printf("%s", "\n");
 }
 

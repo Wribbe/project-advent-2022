@@ -55,12 +55,14 @@ size_t
 first(char * input)
 {
   size_t range[4] = {0};
+  size_t sum_overlapping_pairs = 0;
 
   while(next_range(&input, range)) {
     print_range(range);
+    sum_overlapping_pairs += full_overlap(range);
   }
 
-  return 0;
+  return sum_overlapping_pairs;
 }
 
 

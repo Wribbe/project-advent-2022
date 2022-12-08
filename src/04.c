@@ -70,7 +70,7 @@ first(char * input)
 int
 main(void)
 {
-  char * input_1 = read("inputs/04_test.txt");
+  char * input_1 = read("inputs/04.txt");
   printf("Answer #1: %zu\n", first(input_1));
   free(input_1);
 }

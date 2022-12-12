@@ -82,7 +82,7 @@ print_info_input(struct info_input * info_input)
 
 
 void
-print_stack(struct stack * stack)
+stack_print(struct stack * stack)
 {
   size_t current_max = stack->len_highest_column;
 
@@ -101,7 +101,7 @@ print_stack(struct stack * stack)
 }
 
 void
-stack_add(struct stack * stack, size_t index_column, char box)
+stack_crate_push(struct stack * stack, size_t index_column, char box)
 {
 
   if (box == ' ') {
@@ -138,11 +138,19 @@ next_instruction(
     return false;
   }
 
+  int s_num_boxes = 0;
+  int s_column_from = 0;
+  int s_column_to = 0;
+
   sscanf(
     p_char,
     "%*s%d%*s%d%*s%d",
-    (int *)num_boxes, (int *)column_from, (int *)column_to
+    &s_num_boxes, &s_column_from, &s_column_to
   );
+
+  *num_boxes = s_num_boxes;
+  *column_from = s_column_from-1;
+  *column_to = s_column_to-1;
 
   for (;;p_char++) {
     if (*p_char == '\n') {
@@ -154,6 +162,40 @@ next_instruction(
   *p_instructions = p_char;
   return true;
 }
+
+char
+stack_crate_pop(struct stack * stack, size_t col)
+{
+  struct column * column = &stack->columns[col];
+
+  if (column->height == 0) {
+    return ' ';
+  }
+
+  column->height--;
+  return *column->top--;
+}
+
+
+char
+stack_crate_peek(struct stack * stack, size_t col)
+{
+  struct column * column = &stack->columns[col];
+
+  if (column->height == 0) {
+    return ' ';
+  }
+  return *column->top;
+}
+
+
+void
+stack_crate_move(struct stack * stack, size_t col_from, size_t col_to)
+{
+  printf("Moving crate from %zu to %zu\n", col_from, col_to);
+  stack_crate_push(stack, col_to, stack_crate_pop(stack, col_from));
+}
+
 
 void
 execute_instructions(struct info_input * info_input, char * output)
@@ -203,7 +245,7 @@ execute_instructions(struct info_input * info_input, char * output)
 
       for(;;current_col++,seen_latest--) {
 
-        stack_add(&stack, current_col, *seen_latest);
+        stack_crate_push(&stack, current_col, *seen_latest);
 
         if (seen_latest == seen_crates) {
           break;
@@ -213,7 +255,7 @@ execute_instructions(struct info_input * info_input, char * output)
     }
   }
 
-  print_stack(&stack);
+  stack_print(&stack);
 
   char * p_instructions = info_input->instructions;
 
@@ -221,11 +263,16 @@ execute_instructions(struct info_input * info_input, char * output)
   size_t col_from = 0;
   size_t col_to = 0;
 
-  while(next_instruction(&p_instructions, &num_crates, &col_from, &col_to)) {
-    printf("Parsed: %zu, %zu, %zu\n", num_crates, col_from, col_to);
+  while (next_instruction(&p_instructions, &num_crates, &col_from, &col_to)) {
     for (;num_crates > 0;num_crates--) {
-      printf("Moving crate from %zu to %zu\n", col_from, col_to);
+      stack_crate_move(&stack, col_from, col_to);
+      stack_print(&stack);
+      printf("\n%s\n\n", "---");
     }
+  }
+
+  for (size_t ii=0; ii<info_input->num_columns; ii++) {
+    output[ii] = stack_crate_peek(&stack, ii);
   }
 }
 

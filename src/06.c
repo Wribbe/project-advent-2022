@@ -4,7 +4,18 @@
 #include <stdbool.h>
 
 
+// -----------------------------------------------------------------------------
+// Shared
+// -----------------------------------------------------------------------------
+
+
 #define LEN(x) sizeof(x)/sizeof(x[0])
+
+
+struct test_data {
+  const char * input;
+  size_t correct_result;
+};
 
 
 bool
@@ -52,14 +63,16 @@ start_of_package(const char * input)
 }
 
 
+
+
+// -----------------------------------------------------------------------------
+// Part I
+// -----------------------------------------------------------------------------
+
+
 void
 test_1(void)
 {
-  struct test_data {
-    const char * input;
-    size_t correct_result;
-  };
-
   struct test_data test_data[] = {
     {"mjqjpqmgbljsphdztnvjfqwrcgsmlb", 7},
     {"bvwbjplbgvbhsrlpgdmjqwftvncz", 5},
@@ -76,10 +89,9 @@ test_1(void)
 }
 
 
-int
-main(void)
+void
+first(void)
 {
-
   test_1();
 
   char * input_1 = read("inputs/06.txt");
@@ -88,5 +100,52 @@ main(void)
       start_of_package(input_1)
   );
   free(input_1);
+}
 
+// -----------------------------------------------------------------------------
+// Part II
+// -----------------------------------------------------------------------------
+
+void
+test_2(void)
+{
+  struct test_data test_data[] = {
+    {"mjqjpqmgbljsphdztnvjfqwrcgsmlb", 19},
+    {"bvwbjplbgvbhsrlpgdmjqwftvncz", 23},
+    {"nppdvjthqldpwncqszvftbrmjlhg", 23},
+    {"nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 29},
+    {"zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 26},
+  };
+
+  for (size_t ii=0; ii<LEN(test_data); ii++) {
+    printf("input: %s\n", test_data[ii].input);
+    size_t result = start_of_package(test_data[ii].input);
+    printf("expected: %zu, received: %zu\n", test_data[ii].correct_result, result);
+  }
+}
+
+
+void
+second(void)
+{
+  test_2();
+
+//  char * input_1 = read("inputs/06.txt");
+//  printf(
+//      "answer_1: Number of processed chars before start-of-packet: %zu\n",
+//      start_of_package(input_1)
+//  );
+//  free(input_1);
+}
+
+// -----------------------------------------------------------------------------
+// Main
+// -----------------------------------------------------------------------------
+
+
+int
+main(void)
+{
+  first();
+  second();
 }

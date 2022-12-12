@@ -22,7 +22,7 @@ duplicate_chars_in_window(char * start, char * end)
 
 
 size_t
-answer_1(const char * input)
+start_of_package(const char * input)
 {
   char * start = (char *)input;
   char * end = start+4;
@@ -70,7 +70,7 @@ test_1(void)
 
   for (size_t ii=0; ii<LEN(test_data); ii++) {
     printf("input: %s\n", test_data[ii].input);
-    size_t result = answer_1(test_data[ii].input);
+    size_t result = start_of_package(test_data[ii].input);
     printf("expected: %zu, received: %zu\n", test_data[ii].correct_result, result);
   }
 }
@@ -79,5 +79,14 @@ test_1(void)
 int
 main(void)
 {
+
   test_1();
+
+  char * input_1 = read("inputs/06.txt");
+  printf(
+      "answer_1: Number of processed chars before start-of-packet: %zu\n",
+      start_of_package(input_1)
+  );
+  free(input_1);
+
 }

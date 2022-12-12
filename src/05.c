@@ -323,6 +323,11 @@ crate_mover_9001(
     size_t col_to
 ) {
 
+  if (num_crates == 1) {
+    stack_crate_move(stack, col_from, col_to);
+    return;
+  }
+
   char temp_col[num_crates];
   memset(temp_col, 0, sizeof(temp_col));
 
@@ -332,6 +337,7 @@ crate_mover_9001(
     *top++ = stack_crate_pop(stack, col_from);
   }
 
+  top--;
   for (;;top--) {
     stack_crate_push(stack, col_to, *top);
     if (top == temp_col) {
@@ -363,7 +369,7 @@ main(void)
   printf("#1: Final box arrangement: %s\n", output_1);
   free(input_1);
 
-  char * input_2 = read("inputs/05_test.txt");
+  char * input_2 = read("inputs/05.txt");
 
   struct info_input info_input_2 = get_info_input(input_2);
   char output_2[info_input_2.num_columns];

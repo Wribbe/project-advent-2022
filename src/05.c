@@ -66,7 +66,7 @@ get_info_input(char * input)
 
   info_input.num_columns = line_longest / 4;
   info_input.max_crates_possible = info_input.num_columns * (counted_rows - 1);
-  info_input.instructions = input;
+  info_input.instructions = input+1; // Skip past empty line.
 
   return info_input;
 }
@@ -124,6 +124,36 @@ stack_add(struct stack * stack, size_t index_column, char box)
 // Part I
 // =============================================================================
 
+
+bool
+next_instruction(
+    char ** p_instructions,
+    size_t * num_boxes,
+    size_t * column_from,
+    size_t * column_to
+){
+  char * p_char = *p_instructions;
+
+  if (*p_char == '\0') {
+    return false;
+  }
+
+  sscanf(
+    p_char,
+    "%*s%d%*s%d%*s%d",
+    (int *)num_boxes, (int *)column_from, (int *)column_to
+  );
+
+  for (;;p_char++) {
+    if (*p_char == '\n') {
+      p_char++;
+      break;
+    }
+  }
+
+  *p_instructions = p_char;
+  return true;
+}
 
 void
 execute_instructions(struct info_input * info_input, char * output)
@@ -184,6 +214,19 @@ execute_instructions(struct info_input * info_input, char * output)
   }
 
   print_stack(&stack);
+
+  char * p_instructions = info_input->instructions;
+
+  size_t num_crates = 0;
+  size_t col_from = 0;
+  size_t col_to = 0;
+
+  while(next_instruction(&p_instructions, &num_crates, &col_from, &col_to)) {
+    printf("Parsed: %zu, %zu, %zu\n", num_crates, col_from, col_to);
+    for (;num_crates > 0;num_crates--) {
+      printf("Moving crate from %zu to %zu\n", col_from, col_to);
+    }
+  }
 }
 
 

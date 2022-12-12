@@ -32,11 +32,12 @@ duplicate_chars_in_window(char * start, char * end)
 }
 
 
+
 size_t
-start_of_package(const char * input)
+index_unique_sequence(char * input, size_t size_window)
 {
   char * start = (char *)input;
-  char * end = start+4;
+  char * end = start+size_window-1;
 
   for (;;start++,end++) {
 
@@ -45,13 +46,14 @@ start_of_package(const char * input)
     }
 
     size_t pos_window_start = start-input;
-    size_t pos_window_end = pos_window_start+4;
+    size_t pos_window_end = pos_window_start+size_window;
 
     if (duplicate_chars_in_window(start, end)) {
       printf(
-        "Current window @ [%zu,%zu]: %.4s, contains duplicates, continuing.\n",
+        "Current window [%02zu,%zu]: %.*s, contains duplicates, continuing.\n",
         pos_window_start,
         pos_window_end,
+        (int)size_window,
         start
       );
       continue;
@@ -63,12 +65,15 @@ start_of_package(const char * input)
 }
 
 
-
-
 // -----------------------------------------------------------------------------
 // Part I
 // -----------------------------------------------------------------------------
 
+size_t
+start_of_package(const char * input)
+{
+  return index_unique_sequence((char *)input, 4);
+}
 
 void
 test_1(void)
@@ -106,6 +111,12 @@ first(void)
 // Part II
 // -----------------------------------------------------------------------------
 
+size_t
+start_of_message(const char * input)
+{
+  return index_unique_sequence((char *)input, 14);
+}
+
 void
 test_2(void)
 {
@@ -119,7 +130,7 @@ test_2(void)
 
   for (size_t ii=0; ii<LEN(test_data); ii++) {
     printf("input: %s\n", test_data[ii].input);
-    size_t result = start_of_package(test_data[ii].input);
+    size_t result = start_of_message(test_data[ii].input);
     printf("expected: %zu, received: %zu\n", test_data[ii].correct_result, result);
   }
 }

@@ -274,6 +274,7 @@ execute_instructions(struct info_input * info_input, char * output)
   for (size_t ii=0; ii<info_input->num_columns; ii++) {
     output[ii] = stack_crate_peek(&stack, ii);
   }
+  output[info_input->num_columns] = '\0';
 }
 
 
@@ -292,7 +293,7 @@ first(char * output, struct info_input * info_input)
 int
 main(void)
 {
-  char * input_1 = read("inputs/05_test.txt");
+  char * input_1 = read("inputs/05.txt");
 
   struct info_input info_input = get_info_input(input_1);
   char output_1[info_input.num_columns];

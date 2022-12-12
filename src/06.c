@@ -141,12 +141,12 @@ second(void)
 {
   test_2();
 
-//  char * input_1 = read("inputs/06.txt");
-//  printf(
-//      "answer_1: Number of processed chars before start-of-packet: %zu\n",
-//      start_of_package(input_1)
-//  );
-//  free(input_1);
+  char * input = read("inputs/06.txt");
+  printf(
+      "answer: Number of processed chars before start-of-message: %zu\n",
+      start_of_message(input)
+  );
+  free(input);
 }
 
 // -----------------------------------------------------------------------------

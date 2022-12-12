@@ -31,6 +31,14 @@ struct stack {
 };
 
 
+typedef void (*crane_op)(
+  struct stack * stack,
+  size_t num_crates,
+  size_t column_from,
+  size_t column_to
+);
+
+
 struct info_input
 get_info_input(char * input)
 {
@@ -120,11 +128,6 @@ stack_crate_push(struct stack * stack, size_t index_column, char box)
 }
 
 
-// =============================================================================
-// Part I
-// =============================================================================
-
-
 bool
 next_instruction(
     char ** p_instructions,
@@ -192,7 +195,6 @@ stack_crate_peek(struct stack * stack, size_t col)
 void
 stack_crate_move(struct stack * stack, size_t col_from, size_t col_to)
 {
-  printf("Moving crate from %zu to %zu\n", col_from, col_to);
   stack_crate_push(stack, col_to, stack_crate_pop(stack, col_from));
 }
 
@@ -251,7 +253,7 @@ stack_init(
 
 
 void
-execute_instructions(struct info_input * info_input, char * output)
+execute_instructions(struct info_input * info_input, char * output, crane_op crane_op)
 {
 
   char column_data[info_input->num_columns*info_input->max_crates_possible];
@@ -272,11 +274,7 @@ execute_instructions(struct info_input * info_input, char * output)
   size_t col_to = 0;
 
   while (next_instruction(&p_instructions, &num_crates, &col_from, &col_to)) {
-    for (;num_crates > 0;num_crates--) {
-      stack_crate_move(&stack, col_from, col_to);
-      stack_print(&stack);
-      printf("\n%s\n\n", "---");
-    }
+    crane_op(&stack, num_crates, col_from, col_to);
   }
 
   for (size_t ii=0; ii<info_input->num_columns; ii++) {
@@ -286,11 +284,29 @@ execute_instructions(struct info_input * info_input, char * output)
 }
 
 
+// =============================================================================
+// Part I
+// =============================================================================
+
+
+void
+crate_mover_9000(
+    struct stack * stack,
+    size_t num_crates,
+    size_t col_from,
+    size_t col_to
+) {
+  for (;num_crates > 0;num_crates--) {
+    stack_crate_move(stack, col_from, col_to);
+  }
+}
+
+
 void
 first(char * output, struct info_input * info_input)
 {
   print_info_input(info_input);
-  execute_instructions(info_input, output);
+  execute_instructions(info_input, output, crate_mover_9000);
 }
 
 // =============================================================================
@@ -301,7 +317,7 @@ void
 second(char * output, struct info_input * info_input)
 {
   print_info_input(info_input);
-  execute_instructions(info_input, output);
+  execute_instructions(info_input, output, crate_mover_9000);
 }
 
 // =============================================================================

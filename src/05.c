@@ -309,15 +309,42 @@ first(char * output, struct info_input * info_input)
   execute_instructions(info_input, output, crate_mover_9000);
 }
 
+
 // =============================================================================
 // Part II
 // =============================================================================
+
+
+void
+crate_mover_9001(
+    struct stack * stack,
+    size_t num_crates,
+    size_t col_from,
+    size_t col_to
+) {
+
+  char temp_col[num_crates];
+  memset(temp_col, 0, sizeof(temp_col));
+
+  char * top = temp_col;
+
+  for (;num_crates > 0;num_crates--) {
+    *top++ = stack_crate_pop(stack, col_from);
+  }
+
+  for (;;top--) {
+    stack_crate_push(stack, col_to, *top);
+    if (top == temp_col) {
+      break;
+    }
+  }
+}
 
 void
 second(char * output, struct info_input * info_input)
 {
   print_info_input(info_input);
-  execute_instructions(info_input, output, crate_mover_9000);
+  execute_instructions(info_input, output, crate_mover_9001);
 }
 
 // =============================================================================
@@ -336,12 +363,12 @@ main(void)
   printf("#1: Final box arrangement: %s\n", output_1);
   free(input_1);
 
-  char * input_2 = read("inputs/05.txt");
+  char * input_2 = read("inputs/05_test.txt");
 
   struct info_input info_input_2 = get_info_input(input_2);
   char output_2[info_input_2.num_columns];
-  first(output_2, &info_input_2);
+  second(output_2, &info_input_2);
 
-  printf("#1: Final box arrangement: %s\n", output_2);
+  printf("#2: Final box arrangement: %s\n", output_2);
   free(input_2);
 }

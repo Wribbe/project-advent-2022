@@ -198,22 +198,14 @@ stack_crate_move(struct stack * stack, size_t col_from, size_t col_to)
 
 
 void
-execute_instructions(struct info_input * info_input, char * output)
-{
-
-  char column_data[info_input->num_columns*info_input->max_crates_possible];
-  memset(column_data, 0, sizeof(column_data));
-  struct column columns[info_input->num_columns];
-
-  struct stack stack = {
-    .len_highest_column = 0,
-    .num_columns = info_input->num_columns,
-    .columns = columns,
-  };
-
+stack_init(
+  struct info_input * info_input,
+  struct stack * stack,
+  char * column_data
+) {
   for (size_t ii=0; ii<info_input->num_columns; ii++) {
-    stack.columns[ii].top = &column_data[ii*info_input->max_crates_possible];
-    stack.columns[ii].height = 0;
+    stack->columns[ii].top = &column_data[ii*info_input->max_crates_possible];
+    stack->columns[ii].height = 0;
   }
 
   char * char_p = info_input->instructions;
@@ -245,7 +237,7 @@ execute_instructions(struct info_input * info_input, char * output)
 
       for(;;current_col++,seen_latest--) {
 
-        stack_crate_push(&stack, current_col, *seen_latest);
+        stack_crate_push(stack, current_col, *seen_latest);
 
         if (seen_latest == seen_crates) {
           break;
@@ -254,9 +246,25 @@ execute_instructions(struct info_input * info_input, char * output)
       }
     }
   }
+  stack_print(stack);
+}
 
-  stack_print(&stack);
 
+void
+execute_instructions(struct info_input * info_input, char * output)
+{
+
+  char column_data[info_input->num_columns*info_input->max_crates_possible];
+  memset(column_data, 0, sizeof(column_data));
+  struct column columns[info_input->num_columns];
+
+  struct stack stack = {
+    .len_highest_column = 0,
+    .num_columns = info_input->num_columns,
+    .columns = columns,
+  };
+
+  stack_init(info_input, &stack, column_data);
   char * p_instructions = info_input->instructions;
 
   size_t num_crates = 0;

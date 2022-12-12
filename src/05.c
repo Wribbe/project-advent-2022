@@ -144,26 +144,43 @@ execute_instructions(struct info_input * info_input, char * output)
     stack.columns[ii].height = 0;
   }
 
-  // Set-up initial state of the stack.
-  char * char_p = info_input->start+1;
-  size_t current_col = 0;
-  for(;;) {
+  char * char_p = info_input->instructions;
 
-    stack_add(&stack, current_col, *char_p);
-
-    if (*(char_p+2) == '\n') {
-
-      current_col = 0;
-
-      if (*(char_p+4) == '1') {
-        break;
-      }
-
-    } else {
-      current_col++;
+  // Rewind to last newline before line of numbers.
+  bool seen_first_col_lable = false;
+  for (;;char_p--) {
+    if (*char_p == '1') {
+      seen_first_col_lable = true;
     }
+    if (seen_first_col_lable && *char_p == '\n') {
+      char_p -= 2; // Align with first box-label.
+      break;
+    }
+  }
 
-    char_p += 4;
+  char seen_crates[info_input->num_columns];
+  memset(seen_crates, 0, sizeof(seen_crates));
+  char * seen_latest = &seen_crates[0];
+
+  for(;char_p >= info_input->start; char_p -= 4) {
+
+    *seen_latest++ = *char_p;
+
+    if (*(char_p-2) == '\n' || char_p-1 == info_input->start) {
+
+      seen_latest--;
+      size_t current_col = 0;
+
+      for(;;current_col++,seen_latest--) {
+
+        stack_add(&stack, current_col, *seen_latest);
+
+        if (seen_latest == seen_crates) {
+          break;
+        }
+
+      }
+    }
   }
 
   print_stack(&stack);

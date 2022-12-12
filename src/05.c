@@ -285,6 +285,16 @@ first(char * output, struct info_input * info_input)
   execute_instructions(info_input, output);
 }
 
+// =============================================================================
+// Part II
+// =============================================================================
+
+void
+second(char * output, struct info_input * info_input)
+{
+  print_info_input(info_input);
+  execute_instructions(info_input, output);
+}
 
 // =============================================================================
 // Main
@@ -295,9 +305,19 @@ main(void)
 {
   char * input_1 = read("inputs/05.txt");
 
-  struct info_input info_input = get_info_input(input_1);
-  char output_1[info_input.num_columns];
-  first(output_1, &info_input);
+  struct info_input info_input_1 = get_info_input(input_1);
+  char output_1[info_input_1.num_columns];
+  first(output_1, &info_input_1);
 
   printf("#1: Final box arrangement: %s\n", output_1);
+  free(input_1);
+
+  char * input_2 = read("inputs/05.txt");
+
+  struct info_input info_input_2 = get_info_input(input_2);
+  char output_2[info_input_2.num_columns];
+  first(output_2, &info_input_2);
+
+  printf("#1: Final box arrangement: %s\n", output_2);
+  free(input_2);
 }

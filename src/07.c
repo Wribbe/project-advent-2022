@@ -23,7 +23,7 @@ struct dir {
 
 
 char *
-str_seek(char * str_p, char c)
+str_seek(char * str_p, char * chars)
 {
   char * start = str_p;
   for(;;str_p++) {
@@ -32,8 +32,11 @@ str_seek(char * str_p, char c)
       return str_p;
     }
 
-    if (*str_p == c && str_p != start) {
-      return str_p;
+    char * chars_p = chars;
+    for(;*chars_p != '\0'; chars_p++) {
+      if (*str_p == *chars_p && str_p != start) {
+        return str_p;
+      }
     }
   }
 }
@@ -107,7 +110,7 @@ void
 cmd_cd(char * start, char * end, struct dir * root, struct dir ** current)
 {
   char * name_start = start+3;
-  char * name_end = str_seek(name_start, '\n');
+  char * name_end = str_seek(name_start, "\n");
 
   if (str_prefix(name_start, (*current)->name)) {
     return;
@@ -134,7 +137,7 @@ char *
 consume_next(char * input, struct dir * root, struct dir ** current)
 {
   char * start = input;
-  char * end = str_seek(start, '$');
+  char * end = str_seek(start, "$");
 
   char * start_cmd = start+2;
 

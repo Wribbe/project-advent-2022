@@ -212,6 +212,7 @@ dir_from_input(const char * path_input)
   char * char_p = input;
 
   struct dir root = {.name = "/"};
+  root.parent = &root;
   struct dir * current = &root;
 
   while (*char_p != '\0') {

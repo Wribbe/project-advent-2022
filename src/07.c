@@ -25,7 +25,6 @@ struct dir {
 char *
 str_seek(char * str_p, char * chars)
 {
-  char * start = str_p;
   for(;;str_p++) {
 
     if (*str_p == '\0') {
@@ -34,7 +33,7 @@ str_seek(char * str_p, char * chars)
 
     char * chars_p = chars;
     for(;*chars_p != '\0'; chars_p++) {
-      if (*str_p == *chars_p && str_p != start) {
+      if (*str_p == *chars_p) {
         return str_p;
       }
     }
@@ -73,6 +72,26 @@ dir_append_child(struct dir * parent, struct dir * child)
 }
 
 
+void
+dir_append_file(struct dir * dir, char * name, size_t size)
+{
+  struct file * file = malloc(sizeof(struct file));
+  size_t len_name = strlen(name);
+  file->name = malloc(len_name);
+  strncpy(file->name, name, len_name);
+  file->size = size;
+  if (dir->files == NULL) {
+    dir->files = file;
+  } else {
+    struct file * last_file = dir->files;
+    while(last_file->next != NULL) {
+      last_file = last_file->next;
+    }
+    last_file->next = file;
+  }
+}
+
+
 struct dir *
 dir_create(char * name, size_t len_name)
 {
@@ -95,6 +114,15 @@ dir_print_rec(struct dir * dir, size_t indent)
   struct dir * child = dir->children;
   for(;child != NULL;child=child->next) {
     dir_print_rec(child, indent+2);
+  }
+  for(struct file * file = dir->files;file != NULL;file=file->next) {
+    printf(
+      "%*s- %s (file, size=%zu)\n",
+      (int)indent+2,
+      "",
+      file->name,
+      file->size
+    );
   }
 }
 
@@ -129,7 +157,31 @@ cmd_cd(char * start, char * end, struct dir * root, struct dir ** current)
 void
 cmd_ls(char * start, char * end, struct dir * root, struct dir ** current)
 {
-  printf("Processing ls\n");
+  size_t size_buf_name = 256;
+  char name[size_buf_name];
+  memset(name, 0, sizeof(char) * size_buf_name);
+
+  start += 3; // Skip initial <ls > part.
+  for(;;) {
+    char * end_line = str_seek(start, "\n$");
+
+    if (*end_line == '$' || *end_line == '\0') {
+      break;
+    }
+
+    if (!str_prefix(start, "dir ")) {
+      size_t size_file = strtoul(start, &start, 10);
+      start++;
+      char * name_p = name;
+      for(;*start != '\n';start++) {
+        *name_p++ = *start;
+      }
+      *name_p = '\0';
+      dir_append_file(*current, name, size_file);
+    }
+
+    start = end_line+1;
+  }
 }
 
 
@@ -137,7 +189,7 @@ char *
 consume_next(char * input, struct dir * root, struct dir ** current)
 {
   char * start = input;
-  char * end = str_seek(start, "$");
+  char * end = str_seek(start+1, "$");
 
   char * start_cmd = start+2;
 
@@ -175,7 +227,6 @@ void
 first(void)
 {
   struct dir root = dir_from_input("inputs/07_test.txt");
-  printf("name root: %s\n", root.name);
   dir_print(&root);
 }
 

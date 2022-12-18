@@ -223,11 +223,36 @@ dir_from_input(const char * path_input)
 }
 
 
+size_t
+sum_dir_sizes(struct dir * dir)
+{
+  size_t sum_files = 0;
+
+  for (struct file * file=dir->files; file != NULL; file=file->next) {
+    sum_files += file->size;
+  }
+
+  size_t sum_children = 0;
+  for (struct dir * child=dir->children; child != NULL; child=child->next) {
+    sum_children += sum_dir_sizes(child);
+  }
+
+  size_t sum_this_dir = sum_files + sum_children;
+
+  if (sum_this_dir < 100000) {
+    return sum_this_dir + sum_children;
+  } else {
+    return sum_children;
+  }
+}
+
+
 void
 first(void)
 {
   struct dir root = dir_from_input("inputs/07_test.txt");
   dir_print(&root);
+  printf("sum: %zu\n", sum_dir_sizes(&root));
 }
 
 

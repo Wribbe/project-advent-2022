@@ -251,7 +251,7 @@ sum_dir_sizes(struct dir * dir)
 void
 first(void)
 {
-  struct dir root = dir_from_input("inputs/07_test.txt");
+  struct dir root = dir_from_input("inputs/07.txt");
   dir_print(&root);
   printf("sum: %zu\n", sum_dir_sizes(&root));
 }

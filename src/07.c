@@ -53,8 +53,34 @@ str_prefix(char * str, const char * prefix)
 }
 
 
+bool
+str_contains_char(const char * str, char c)
+{
+  for (;*str != '\0'; str++) {
+    if (*str == c) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 void
-dir_append_child(struct dir * parent, struct dir * child)
+str_copy_until(char * src, const char * prefix, char * dest, size_t max_len)
+{
+  size_t num_processed = 0;
+  for (;num_processed<max_len; num_processed++) {
+    if (str_contains_char(prefix, *src)) {
+      break;
+    }
+    *dest++ = *src++;
+  }
+  dest[num_processed] = '\0';
+}
+
+
+void
+dir_child_append(struct dir * parent, struct dir * child)
 {
   if (parent->children == NULL) {
     parent->children = child;
@@ -72,8 +98,37 @@ dir_append_child(struct dir * parent, struct dir * child)
 }
 
 
+bool
+dir_contains_child(struct dir * parent, char * name)
+{
+  struct dir * child = parent->children;
+
+  for (;child != NULL; child=child->next) {
+    if (strcmp(child->name, name) == 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+bool
+dir_contains_file(struct dir * dir, char * name_file)
+{
+  struct file * file = dir->files;
+
+  for (;file != NULL; file=file->next) {
+    if (strcmp(file->name, name_file) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 void
-dir_append_file(struct dir * dir, char * name, size_t size)
+dir_file_append(struct dir * dir, char * name, size_t size)
 {
   struct file * file = malloc(sizeof(struct file));
   size_t len_name = strlen(name);
@@ -93,15 +148,16 @@ dir_append_file(struct dir * dir, char * name, size_t size)
 
 
 struct dir *
-dir_create(char * name, size_t len_name)
+dir_create(char * name)
 {
-    struct dir * dir = malloc(sizeof(struct dir));
+  size_t len_name = strlen(name);
+  struct dir * dir = malloc(sizeof(struct dir));
 
-    dir->name = malloc(len_name+1);
-    strncpy(dir->name, name, len_name);
-    dir->name[len_name] = '\0';
+  dir->name = malloc(len_name+1);
+  strncpy(dir->name, name, len_name);
+  dir->name[len_name] = '\0';
 
-    return dir;
+  return dir;
 }
 
 
@@ -138,7 +194,6 @@ void
 cmd_cd(char * start, char * end, struct dir * root, struct dir ** current)
 {
   char * name_start = start+3;
-  char * name_end = str_seek(name_start, "\n");
 
   if (str_prefix(name_start, (*current)->name)) {
     return;
@@ -146,11 +201,27 @@ cmd_cd(char * start, char * end, struct dir * root, struct dir ** current)
 
   if (str_prefix(name_start, "..")) {
     *current = (*current)->parent;
-  } else {
-    struct dir * new_dir = dir_create(name_start, name_end-name_start);
-    dir_append_child(*current, new_dir);
-    *current = new_dir;
+    return;
   }
+
+  size_t size_buff = 256;
+  char name_new_dir[size_buff];
+
+  str_copy_until(name_start, "\n", name_new_dir, size_buff);
+
+  if (dir_contains_child(*current, name_new_dir)) {
+    printf(
+      "WARNING: %s already has a child named %s, skipping.\n",
+      (*current)->name,
+      name_new_dir
+    );
+    return;
+  }
+
+  struct dir * new_dir = dir_create(name_new_dir);
+  dir_child_append(*current, new_dir);
+  *current = new_dir;
+
 }
 
 
@@ -177,7 +248,15 @@ cmd_ls(char * start, char * end, struct dir * root, struct dir ** current)
         *name_p++ = *start;
       }
       *name_p = '\0';
-      dir_append_file(*current, name, size_file);
+      if (dir_contains_file(*current, name)) {
+        printf(
+          "Warning file %s already added to dir %s\n",
+          name,
+          (*current)->name
+        );
+      } else {
+        dir_file_append(*current, name, size_file);
+      }
     }
 
     start = end_line+1;

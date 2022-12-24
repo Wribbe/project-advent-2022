@@ -75,7 +75,7 @@ str_copy_until(char * src, const char * prefix, char * dest, size_t max_len)
     }
     *dest++ = *src++;
   }
-  dest[num_processed] = '\0';
+  *dest = '\0';
 }
 
 
@@ -86,12 +86,7 @@ dir_child_append(struct dir * parent, struct dir * child)
     parent->children = child;
   } else {
     struct dir * last_child = parent->children;
-    for(;;) {
-      if (last_child->next == NULL) {
-        break;
-      }
-      last_child = last_child->next;
-    }
+    for(;last_child->next != NULL;last_child=last_child->next) {}
     last_child->next = child;
   }
   child->parent = parent;
@@ -195,10 +190,6 @@ cmd_cd(char * start, char * end, struct dir * root, struct dir ** current)
 {
   char * name_start = start+3;
 
-  if (str_prefix(name_start, (*current)->name)) {
-    return;
-  }
-
   if (str_prefix(name_start, "..")) {
     *current = (*current)->parent;
     return;
@@ -208,6 +199,11 @@ cmd_cd(char * start, char * end, struct dir * root, struct dir ** current)
   char name_new_dir[size_buff];
 
   str_copy_until(name_start, "\n", name_new_dir, size_buff);
+
+  if (strcmp(name_new_dir, (*current)->name) == 0) {
+    printf("!!!! Already in %s\n", name_new_dir);
+    return;
+  }
 
   if (dir_contains_child(*current, name_new_dir)) {
     printf(
@@ -270,6 +266,8 @@ consume_next(char * input, struct dir * root, struct dir ** current)
   char * start = input;
   char * end = str_seek(start+1, "$");
 
+  printf("\n<COMMAND START>\n%.*s\n<COMMAND END>\n", (int)(end-start), start);
+
   char * start_cmd = start+2;
 
   if (str_prefix(start_cmd, "cd")) {
@@ -304,8 +302,9 @@ dir_from_input(const char * path_input)
 
 
 size_t
-sum_dir_sizes(struct dir * dir)
+sum_dir_sizes(struct dir * dir, size_t * total)
 {
+  size_t cutoff = 100000;
   size_t sum_files = 0;
 
   for (struct file * file=dir->files; file != NULL; file=file->next) {
@@ -314,16 +313,23 @@ sum_dir_sizes(struct dir * dir)
 
   size_t sum_children = 0;
   for (struct dir * child=dir->children; child != NULL; child=child->next) {
-    sum_children += sum_dir_sizes(child);
+    sum_children += sum_dir_sizes(child, total);
   }
 
-  size_t sum_this_dir = sum_files + sum_children;
+  size_t size_this_dir = sum_files + sum_children;
 
-  if (sum_this_dir < 100000) {
-    return sum_this_dir + sum_children;
-  } else {
-    return sum_children;
+  if (size_this_dir <= cutoff) {
+    *total += size_this_dir;
   }
+  printf(
+    "Done processing %s: %zu \t| %d \t| %zu\n",
+    dir->name,
+    size_this_dir,
+    size_this_dir <= cutoff,
+    *total
+  );
+
+  return size_this_dir;
 }
 
 
@@ -332,7 +338,9 @@ first(void)
 {
   struct dir root = dir_from_input("inputs/07.txt");
   dir_print(&root);
-  printf("sum: %zu\n", sum_dir_sizes(&root));
+  size_t total = 0;
+  sum_dir_sizes(&root, &total);
+  printf("sum: %zu\n", total);
 }
 
 
